@@ -8,11 +8,12 @@ def display_score():
     score_surface = text_font.render(f"Score: {current_time}", False, (64, 64, 64))
     score_rect = score_surface.get_rect(center=(400, 50))
     screen.blit(score_surface, score_rect)
+    
     return current_time
 
 
 # Mostrar Inicio/GameOver
-def display_gameOver():
+def display_gameOver(record):
     screen.fill((94, 129, 162))
     screen.blit(player_stand, player_stand_rect)
 
@@ -22,6 +23,7 @@ def display_gameOver():
 
     # Limpiar lista de obstáculos
     obstacle_rect_list.clear()
+        
 
     # Show Title
     game_title = text_font.render("SALTA POR TU VIDA", False, (111, 235, 196))
@@ -31,11 +33,27 @@ def display_gameOver():
     game_subtitle_rect = game_subtitle.get_rect(center=(400, 320))
     screen.blit(game_title, game_title_rect)
     screen.blit(game_subtitle, game_subtitle_rect)
+        
 
     # Show Score
     score_message = text_font.render(f"Your score: {score}", False, "Yellow")
-    score_message_rect = score_message.get_rect(center=(400, 360))
+    score_message_rect = score_message.get_rect(center=(400, 350))
     screen.blit(score_message, score_message_rect)
+
+    # Record
+    if(score == 0):
+        return 0
+    elif(score >= record):
+        new_record_surf = text_font.render("NEW RECORD", False, "Yellow").convert()
+        new_record_rect = new_record_surf.get_rect(center=(400,380))
+        screen.blit(new_record_surf,new_record_rect)
+        record = score
+        return record
+    else:
+        new_record_surf = text_font.render(f"Record: {record}", False, "Yellow").convert()
+        new_record_rect = new_record_surf.get_rect(center=(400,380))
+        screen.blit(new_record_surf,new_record_rect)
+        return record
 
 
 # Movimiento obstáculos
@@ -88,8 +106,9 @@ pygame.init()
 screen = pygame.display.set_mode((800, 400))
 pygame.display.set_caption("Runner xD")
 mouse_pos = (0, 0)
-game_active = False
+record = 0
 score = 0
+game_active = False
 
 # Clock (controlling the frametime)
 clock = pygame.time.Clock()
@@ -189,7 +208,7 @@ while True:
                 # Crear enemigo volador
                 else:
                     obstacle_rect_list.append(
-                        fly_surf.get_rect(bottomright=(randint(900, 1100), 210))
+                        fly_surf.get_rect(bottomright=(randint(900, 1100), 210)) 
                     )
             # Animaciones de los enemigos
             if event.type == snail_animation_timer:
@@ -252,7 +271,7 @@ while True:
 
     # Game Over / Start Game
     else:
-        display_gameOver()
+        record = display_gameOver(record)
         aceleracion = 0
 
     # update everything
