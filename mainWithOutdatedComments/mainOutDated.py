@@ -8,7 +8,6 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
 
-        # Sprites
         player_walk_1 = pygame.image.load(
             "graphics/Player/player_walk_1.png"
         ).convert_alpha()
@@ -20,7 +19,7 @@ class Player(pygame.sprite.Sprite):
         self.player_jump = pygame.image.load("graphics/Player/jump.png").convert_alpha()
 
         self.image = self.player_walk[self.player_index]
-        self.rect = self.image.get_rect(midbottom=(80, 300))
+        self.rect = self.image.get_rect(midbottom=(200, 300))
 
         # Gravedad
         self.gravity = 0
@@ -62,13 +61,11 @@ class Obstacle(pygame.sprite.Sprite):
     def __init__(self, type):
         super().__init__()
 
-        # Sprites Mosca
         if type == "fly":
             fly_1 = pygame.image.load("graphics/Fly/Fly1.png").convert_alpha()
             fly_2 = pygame.image.load("graphics/Fly/Fly2.png").convert_alpha()
             self.frames = [fly_1, fly_2]
             y_pos = 210
-        # Sprites Caracol
         else:
             snail_1 = pygame.image.load("graphics/snail/snail1.png").convert_alpha()
             snail_2 = pygame.image.load("graphics/snail/snail2.png").convert_alpha()
@@ -80,20 +77,17 @@ class Obstacle(pygame.sprite.Sprite):
         self.image = self.frames[self.animation_index]
         self.rect = self.image.get_rect(midbottom=(randint(900, 1100), y_pos))
 
-    # Animaciones
     def animation_state(self):
         self.animation_index += 0.1
         if self.animation_index >= len(self.frames):
             self.animation_index = 0
         self.image = self.frames[int(self.animation_index)]
 
-    # Actualizar obstáculo
     def update(self):
         self.animation_state()
         self.rect.x -= 6
         self.destroy()
 
-    # Destruir obstáculo
     def destroy(self):
         if self.rect.x <= -100:
             self.kill()
@@ -113,6 +107,14 @@ def display_score():
 def display_gameOver(record):
     screen.fill((94, 129, 162))
     screen.blit(player_stand, player_stand_rect)
+
+    # OUTDATED
+    # # Resetear posición del jugador
+    # player_rect.midbottom = (80, 300)
+    # player_grav = 0
+
+    # # Limpiar lista de obstáculos
+    # obstacle_rect_list.clear()
 
     # Show Title
     game_title = text_font.render("SALTA POR TU VIDA", False, (111, 235, 196))
@@ -146,12 +148,43 @@ def display_gameOver(record):
         return record
 
 
+# Movimiento obstáculos
+def obstacle_movement(obstacle_list):
+    if obstacle_list:
+        # Spawnear y mover todos los caracoles
+        for obstacle_rect in obstacle_list:
+            obstacle_rect.x -= 4 + aceleracion
+
+            # Si tiene altura 300 -> es un caracol
+            if obstacle_rect.bottom == 300:
+                screen.blit(snail_surface, obstacle_rect)
+            # Si no, es un enemigo volador
+            else:
+                screen.blit(fly_surf, obstacle_rect)
+
+        # Borrar los caracoles que pasen la x = -100
+        obstacle_list = [obstacle for obstacle in obstacle_list if obstacle.x > -100]
+        return obstacle_list
+    else:
+        return []
+
+
+# Colisiones
+def collisions(player, obstacles):
+    if obstacles:
+        for rect in obstacles:
+            if player.colliderect(rect):
+                return False
+    return True
+
+
 def collision_sprite():
     if pygame.sprite.spritecollide(player.sprite, obstacle_group, False):
         obstacle_group.empty()
         return False
     else:
         return True
+
 
 # Animacion del jugador
 def player_animation():
@@ -166,6 +199,7 @@ def player_animation():
         if player_index >= len(player_walk):
             player_index = 0
         player_surf = player_walk[int(player_index)]
+
 
 # Initialitaze
 pygame.init()
@@ -200,7 +234,44 @@ sky_surface = pygame.image.load("graphics/Sky.png").convert()
 # Ground surface
 ground_surface = pygame.image.load("graphics/ground.png").convert()
 
-# Player start game
+# OUTDATED
+# # <----OBSTACLES---->
+# # Snail surfaces
+# snail_frame_1 = pygame.image.load("graphics/snail/snail1.png").convert_alpha()
+# snail_frame_2 = pygame.image.load("graphics/snail/snail2.png").convert_alpha()
+# snail_frames = [snail_frame_1, snail_frame_2]
+# snail_frame_index = 0
+# snail_surface = snail_frames[snail_frame_index]
+
+# # Fly_surf
+# fly_frame_1 = pygame.image.load("graphics/Fly/Fly1.png").convert_alpha()
+# fly_frame_2 = pygame.image.load("graphics/Fly/Fly2.png").convert_alpha()
+# fly_frames = [fly_frame_1, fly_frame_2]
+# fly_frame_index = 0
+# fly_surf = fly_frames[fly_frame_index]
+
+# # Lista de obstáculos:
+# obstacle_rect_list = []
+
+# # <----Player---->
+# # Player surfaces
+# player_walk_1 = pygame.image.load("graphics/Player/player_walk_1.png").convert_alpha()
+# player_walk_2 = pygame.image.load("graphics/Player/player_walk_2.png").convert_alpha()
+# player_walk = [player_walk_1, player_walk_2]
+# player_jump = pygame.image.load("graphics/Player/jump.png").convert_alpha()
+
+# # Indices
+# player_index = 0
+
+# # Lista de superficies
+# player_surf = player_walk[player_index]
+# # Player rectangle
+# player_rect = player_surf.get_rect(midbottom=(80, 300))
+
+# # Player Gravity
+# player_grav = 0
+
+# # Player start game
 player_stand = pygame.image.load("graphics/Player/player_stand.png").convert_alpha()
 player_stand = pygame.transform.rotozoom(player_stand, 0, 2)  # Escalar la imagen
 player_stand_rect = player_stand.get_rect(center=(400, 200))
@@ -208,6 +279,13 @@ player_stand_rect = player_stand.get_rect(center=(400, 200))
 # <----Timers---->
 obstacle_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(obstacle_timer, 1200)
+
+# OUTDATED
+# snail_animation_timer = pygame.USEREVENT + 2
+# pygame.time.set_timer(snail_animation_timer, 500)
+
+# fly_animation_timer = pygame.USEREVENT + 3
+# pygame.time.set_timer(fly_animation_timer, 200)
 
 
 # Event Loop
@@ -217,11 +295,46 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-        # Timer en juego activo
+        # Controles en Juego activo
         if game_active:
             if event.type == obstacle_timer:
                 # Crear obstáculo
                 obstacle_group.add(Obstacle(choice(["fly", "snail", "snail", "snail"])))
+
+            # OUTDATED
+            # Controles de ratón
+            # if event.type == pygame.MOUSEBUTTONDOWN and player_rect.bottom >= 300:
+            #     player_grav = -20
+            # # Controles de teclado
+            # if event.type == pygame.KEYDOWN:
+            #     if event.key == pygame.K_SPACE and player_rect.bottom >= 300:
+            #         player_grav = -20
+            # # Crear enemigos
+
+            # Crear caracol (a partir de variable aleatoria)
+            # if randint(0, 3):
+            #    obstacle_rect_list.append(
+            #        snail_surface.get_rect(bottomright=(randint(900, 1100), 300))
+            #    )
+            # Crear enemigo volador
+            # else:
+            #    obstacle_rect_list.append(
+            #        fly_surf.get_rect(bottomright=(randint(900, 1100), 210))
+            #    )
+
+            # # Animaciones de los enemigos
+            # if event.type == snail_animation_timer:
+            #     if snail_frame_index == 0:
+            #         snail_frame_index = 1
+            #     else:
+            #         snail_frame_index = 0
+            #     snail_surface = snail_frames[snail_frame_index]
+            # if event.type == fly_animation_timer:
+            #     if fly_frame_index == 0:
+            #         fly_frame_index = 1
+            #     else:
+            #         fly_frame_index = 0
+            #     fly_surf = fly_frames[fly_frame_index]
 
         # Controles en Game Over
         else:
@@ -254,8 +367,27 @@ while True:
         obstacle_group.draw(screen)
         obstacle_group.update()
 
+        # OUTDATED
+        # # Player (Antiguo)
+        # player_grav += 1
+        # player_rect.y += player_grav
+
+        # if player_rect.bottom >= 300:
+        #     player_rect.bottom = 300
+
+        # # Animaciones
+        # player_animation()
+
+        # # Draw player
+        # screen.blit(player_surf, player_rect)
+
+        # Obstacle movement (Antiguo)
+        # obstacle_rect_list = obstacle_movement(obstacle_rect_list)
+
         # Colisiones
         game_active = collision_sprite()
+        # OUTDATED
+        # game_active = collisions(player_rect, obstacle_rect_list)
 
     # Game Over / Start Game
     else:
